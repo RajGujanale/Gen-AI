@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Assisted Software Testing Support System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #1f3a5f;
+            --primary-dark: #162a44;
+            --accent: #2e86ab;
+            --light: #f4f7fb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --muted: #6b7280;
+            --card: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .bg-primary {
+            background: var(--primary);
+        }
+
+        .bg-primary-dark {
+            background: var(--primary-dark);
+        }
+
+        .bg-white {
+            background: var(--card);
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .text-muted {
+            color: var(--muted);
+        }
+
+        .border-primary {
+            border: 1px solid var(--primary);
+        }
+
+        .border-muted {
+            border: 1px solid var(--border);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .chip {
+            background: white;
+            border: 1.5px solid var(--border);
+            color: var(--primary);
+            padding: 0.4rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+            color: white;
+            background: var(--primary);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .status-pass { background: #d1e7dd; color: #0f5132; }
+        .status-fail { background: #f8d7da; color: #842029; }
+        .status-blocked { background: #fff3cd; color: #664303; }
+        .status-not-executed { background: #e2e6ea; color: #6c757d; }
+
+        .req-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .req-card:hover {
+            border-color: var(--primary);
+        }
+
+        .tab-trigger {
+            all: unset;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+
+        .tab-trigger:hover {
+            color: var(--primary);
+        }
+
+        .tab-trigger.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="border-b border-border bg-primary/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2h2a2 2 0 002 2m2.067-1.958c.956.817 1.807 1.5 2.579 2.082a4.5 4.5 0 01.098 1.465l.038.331a4.5 4.5 0 001.438 1.227h2.155c.77 0 1.382-.35 1.893-.973l.045-.289c.686-.568.938-1.34 1.008-2.173a8.05 8.05 0 00.395-2.085c0-1.328-.09-2.56-.26-3.735a6.098 6.098 0 00-1.52-.883l-.054-.343c-1.32-.967-2.708-1.593-4.36-1.593-1.693 0-3.09.658-4.188 1.67-1.15.805-2.067 1.358-3.328 1.535-2.074.28-3.808.61-4.954.837-.826.145-1.64.26-2.44.26-.88 0-1.72-.077-2.512-.225a5.82 5.82 0 00-.933-.588z"/>
+                    </path>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-primary">AI Testing Support</h1>
+                    <p class="text-sm text-muted">Online Shopping System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-muted" id="user-count">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-6">
+
+        <!-- Header Section -->
+        <header class="mb-6 animate-fade-in-up">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary mb-1">Generate Test Cases</h2>
+                    <p class="text-muted">Enter functional requirements to generate structured test cases using AI</p>
+                </div>
+                <div class="self-center">
+                    <button class="btn-primary" onclick="loadSampleRequirements()">Load Sample Requirements</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Requirements Input -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="req-card p-4">
+                <h3 class="font-semibold text-primary mb-3">Functional Requirements</h3>
+                <textarea id="requirements-text" rows="8" cols="100"
+                    class="w-full px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                    placeholder="FR-01: User Registration - The system shall allow new users to register using valid details such as name, email address, and password.
+FR-02: User Login - The system shall authenticate registered users using valid credentials and reject invalid credentials.
+FR-03: Product Search - The system shall allow users to search for products by name or keyword and display relevant results.
+FR-04: Add to Cart - The system shall allow users to add available products to the shopping cart and update product quantities.
+FR-05: Checkout - The system shall validate the delivery address and required checkout information before allowing an order to be placed.
+FR-06: Order Placement - The system shall create an order when all required checkout conditions are satisfied and payment is successfully completed.
+FR-07: Input Validation - The system shall reject invalid inputs, missing mandatory fields, and values outside the permitted limits."></textarea>
+            </div>
+        </section>
+
+        <!-- Generate Button -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex gap-3">
+                <button id="generate-btn" class="btn-primary flex-1">Generate Test Cases with AI</button>
+                <button id="clear-btn" class="btn-secondary">Clear</button>
+            </div>
+        </section>
+
+        <!-- Test Cases Table -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div class="flex justify-between align-items-center mb-4">
+                <h3 class="font-semibold text-primary">Generated Test Cases</h3>
+                <span id="cases-count" class="text-muted">0 test cases</span>
+            </div>
+            <div id="test-cases-container" class="overflow-x-auto rounded-lg border border-border">
+                <p class="text-muted p-8 text-center" id="no-cases-msg">Enter requirements and click generate to display test cases</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl">
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-pass">
+                    <div class="text-3x font-bold text-success" id="pass-count">0</div>
+                    <div class="text-sm text-muted mt-1">Passed</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-fail">
+                    <div class="text-3x font-bold text-error" id="fail-count">0</div>
+                    <div class="text-sm text-muted mt-1">Failed</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-blocked">
+                    <div class="text-3x font-bold text-warning" id="blocked-count">0</div>
+                    <div class="text-sm text-muted mt-1">Blocked</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-not-executed">
+                    <div class="text-3x font-bold text-muted" id="not-executed-count">0</div>
+                    <div class="text-sm text-muted mt-1">Not Executed</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="pt-6 animate-fade-in-up" style="animation-delay: 0.5s;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
+                <button id="export-csv-btn" class="btn-primary w-full" disabled>Export as CSV</button>
+                <button id="export-json-btn" class="btn-secondary w-full" disabled>Export as JSON</button>
+                <button id="clear-all-btn" class="btn-danger w-full">Clear All</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Test Case Modal -->
+    <div id="test-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title">Test Case Details</h3>
+                <button id="close-modal" aria-label="Close" onclick="closeTestModal()"
+                    class="text-muted hover:text-primary transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18M6 6l12 12"/>
+                    </path>
+                </button>
+            </div>
+            <div id="modal-body">
+                <!-- Test case details will be populated here -->
+            </div>
+            <div class="pt-4 border-t border-border flex justify-end gap-2">
+                <button class="btn-secondary px-4" onclick="closeTestModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if session is active
+        let activeSession = false;
+
+        // Load sample requirements into the textarea
+        function loadSampleRequirements() {
+            const sample = `FR-01: User Registration - The system shall allow new users to register using valid details such as name, email address, and password.
+FR-02: User Login - The system shall authenticate registered users using valid credentials and reject invalid credentials.
+FR-03: Product Search - The system shall allow users to search for products by name or keyword and display relevant results.
+FR-04: Add to Cart - The system shall allow users to add available products to the shopping cart and update product quantities.
+FR-05: Checkout - The system shall validate the delivery address and required checkout information before allowing an order to be placed.
+FR-06: Order Placement - The system shall create an order when all required checkout conditions are satisfied and payment is successfully completed.
+FR-07: Input Validation - The system shall reject invalid inputs, missing mandatory fields, and values outside the permitted limits.`;
+            document.getElementById('requirements-text').value = sample;
+        }
+
+        // Clear the textarea
+        function clearRequirements() {
+            document.getElementById('requirements-text').value = '';
+        }
+
+        // Show the test case modal
+        function showTestModal(testCase) {
+            document.getElementById('test-modal').classList.add('active');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-medium text-muted">Test Case ID:</p>
+                        <p class="font-mono text-primary" id="modal-tc-id">${testCase.id}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Requirement ID:</p>
+                        <p class="font-mono" id="modal-req-id">${testCase.requirement_id}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Test Scenario:</p>
+                        <p class="font-medium" id="modal-scenario">${testCase.scenario}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Classification:</p>
+                        <span class="chip" id="modal-classification">${testCase.classification}</span>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Preconditions:</p>
+                        <p class="text-muted break-all" id="modal-preconditions">${testCase.preconditions}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Input Data:</p>
+                        <p class="text-muted break-all" id="modal-input-data">${testCase.input_data}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Expected Result:</p>
+                        <p class="text-primary break-all" id="modal-expected-result">${testCase.expected_result}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Test Steps:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-sm" id="modal-test-steps">
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <input type="text" id="actual-result-input" class="w-full px-4 py-3 rounded-lg border border-border mt-3 focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Enter actual result observed">
+            <div class="pt-3 flex justify-end gap-2">
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Pass')">Pass</button>
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Fail')">Fail</button>
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Blocked')">Blocked</button>
+            </div>
+            <p class="text-xs text-muted mt-2">Actual result will be stored with the test case.</p>
+        </div>
+    </div>
+
+    <!-- Initialize -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load sample requirements on startup
+            loadSampleRequirements();
+            
+            // Generate test cases when button clicked
+            document.getElementById('generate-btn').addEventListener('click', function() {
+                const requirementsText = document.getElementById('requirements-text').value.trim();
+                if (!requirementsText) {
+                    alert('Please enter or load functional requirements first.');
+                    return;
+                }
+                
+                // Show loading state
+                const btn = this;
+                btn.disabled = true;
+                btn.textContent = 'Generating...';
+                
+                fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ requirements: requirementsText })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        btn.disabled = false;
+                        btn.textContent = 'Generate Test Cases with AI';
+                        return;
+                    }
+                    
+                    // Display test cases
+                    displayTestCases(data.test_cases);
+                    
+                    // Update summary
+                    updateSummary(data.test_results);
+                    
+                    // Enable export buttons
+                    document.getElementById('export-csv-btn').disabled = false;
+                    document.getElementById('export-json-btn').disabled = false;
+                    
+                    btn.disabled = false;
+                    btn.textContent = 'Generate Test Cases with AI';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while generating test cases.');
+                    btn.disabled = false;
+                    btn.textContent = 'Generate Test Cases with AI';
+                });
+            });
+            
+            // Clear button
+            document.getElementById('clear-btn').addEventListener('click', clearRequirements);
+            
+            // Export CSV
+            document.getElementById('export-csv-btn').addEventListener('click', function() {
+                window.location.href = '/export/csv';
+            });
+            
+            // Export JSON
+            document.getElementById('export-json-btn').addEventListener('click', function() {
+                window.location.href = '/export/json';
+            });
+            
+            // Clear all
+            document.getElementById('clear-all-btn').addEventListener('click', function() {
+                if (confirm('Clear all generated test cases?')) {
+                    clearRequirements();
+                    document.getElementById('test-cases-container').innerHTML = '<p class="text-muted p-8 text-center">Enter requirements and click generate to display test cases</p>';
+                    document.getElementById('cases-count').textContent = '0 test cases';
+                    document.getElementById('export-csv-btn').disabled = true;
+                    document.getElementById('export-json-btn').disabled = true;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

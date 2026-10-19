@@ -1,0 +1,205 @@
+[
+  {
+    "id": 1,
+    "category": "Admissions",
+    "question": "What is the eligibility criteria for admission to the B.Tech Computer Science and Engineering program?",
+    "answer": "Candidates must have passed 10+2 (or equivalent) with Physics, Mathematics, and English as compulsory subjects, securing a minimum aggregate of 50% marks. Admission is based on the rank obtained in the state-level engineering entrance examination, followed by counseling conducted by the college.",
+    "keywords": ["admission", "eligibility", "criteria", "B.Tech", "Computer Science", "engineering", "10+2", "Physics", "Mathematics", "English", "50%", "entrance examination", "counseling"]
+  },
+  {
+    "id": 2,
+    "category": "Admissions",
+    "question": "How can I apply for admission?",
+    "answer": "Applications can be submitted online through the college admission portal. Candidates need to register, fill in personal and academic details, upload required documents, and pay the application fee. The application window opens every year in May and closes in June.",
+    "keywords": ["apply", "admission", "application", "online", "portal", "register", "documents", "fee", "May", "June"]
+  },
+  {
+    "id": 3,
+    "category": "Admissions",
+    "question": "What are the admission deadlines?",
+    "answer": "The online application portal opens on May 1, 2026, and closes on June 15, 2026. Counseling sessions are scheduled from June 20 to July 5, 2026. The final date for fee payment and admission confirmation is July 10, 2026.",
+    "keywords": ["deadline", "admission", "May 1", "June 15", "June 20", "July 5", "July 10", "fee payment", "counseling", "confirmation"]
+  },
+  {
+    "id": 4,
+    "category": "Admissions",
+    "question": "What documents are required for admission?",
+    "answer": "Candidates must submit: 10+2 mark sheet and pass certificate, entrance examination rank card, transfer certificate, migration certificate (if applicable), category certificate (if claiming reservation), passport-size photographs, and address proof.",
+    "keywords": ["documents", "required", "admission", "10+2", "mark sheet", "rank card", "transfer certificate", "migration certificate", "category certificate", "photographs", "address proof"]
+  },
+  {
+    "id": 5,
+    "category": "Admissions",
+    "question": "What is the total fee for the B.Tech program?",
+    "answer": "The tuition fee for the B.Tech Computer Science and Engineering program is ₹1,20,000 per year. Additional charges include examination fees, library fees, and hostel fees (optional). The total approximate cost per year including hostel is ₹1,80,000.",
+    "keywords": ["fee", "B.Tech", "tuition", "₹1,20,000", "examination fees", "library fees", "hostel", "₹1,80,000", "cost", "per year"]
+  },
+  {
+    "id": 6,
+    "category": "Admissions",
+    "question": "Are scholarships available?",
+    "answer": "Yes, the college offers merit-based scholarships to students securing top ranks in the entrance examination, covering up to 50% of tuition fees. Need-based financial aid is also available for economically weaker sections, subject to document verification.",
+    "keywords": ["scholarship", "scholarships", "merit", "financial aid", "tuition fees", "50%", "economically weaker", "document verification"]
+  },
+  {
+    "id": 7,
+    "category": "Admissions",
+    "question": "How many seats are available in the department?",
+    "answer": "The Department of Computer Science and Engineering has an annual intake of 120 seats for the B.Tech program, of which 10% are reserved for lateral entry candidates in the second year.",
+    "keywords": ["seats", "seat availability", "intake", "120", "B.Tech", "lateral entry", "second year", "reserved"]
+  },
+  {
+    "id": 8,
+    "category": "Courses",
+    "question": "What courses are offered by the department?",
+    "answer": "The department offers a B.Tech in Computer Science and Engineering (4 years), an M.Tech in Computer Science and Engineering (2 years), and a Diploma in Computer Engineering (3 years).",
+    "keywords": ["courses", "offered", "department", "B.Tech", "Computer Science", "Engineering", "M.Tech", "Diploma", "Computer Engineering", "4 years", "2 years", "3 years"]
+  },
+  {
+    "id": 9,
+    "category": "Courses",
+    "question": "What is the duration of the B.Tech program?",
+    "answer": "The B.Tech Computer Science and Engineering program is a 4-year full-time course divided into 8 semesters.",
+    "keywords": ["duration", "B.Tech", "4-year", "full-time", "8 semesters", "Computer Science", "Engineering"]
+  },
+  {
+    "id": 10,
+    "category": "Courses",
+    "question": "Where can I find the syllabus?",
+    "answer": "The detailed syllabus for each semester is available on the college website under the Academics section and can also be obtained from the department office. The syllabus is designed as per the university curriculum.",
+    "keywords": ["syllabus", "college website", "Academics", "department office", "university curriculum", "semester"]
+  },
+  {
+    "id": 11,
+    "category": "Courses",
+    "question": "What subjects are taught in the first year?",
+    "answer": "First-year subjects include Engineering Mathematics, Engineering Physics, Engineering Chemistry, Basic Electrical and Electronics Engineering, Programming in C, Engineering Graphics, and Communicative English.",
+    "keywords": ["subjects", "first year", "Engineering Mathematics", "Engineering Physics", "Engineering Chemistry", "Programming in C", "Engineering Graphics", "Communicative English"]
+  },
+  {
+    "id": 12,
+    "category": "Courses",
+    "question": "How does the credit system work?",
+    "answer": "Each course is assigned credits based on weekly contact hours. Students must earn a minimum of 160 credits over 8 semesters to graduate, including core courses, elective courses, practical laboratories, and a final-year project.",
+    "keywords": ["credit system", "credits", "weekly contact hours", "160 credits", "8 semesters", "graduate", "core courses", "elective courses", "practical laboratories", "final-year project"]
+  },
+  {
+    "id": 13,
+    "category": "Courses",
+    "question": "Are elective subjects available?",
+    "answer": "Yes, students can choose elective subjects starting from the fifth semester. Electives include Artificial Intelligence, Machine Learning, Data Science, Cloud Computing, Cyber Security, and Mobile Application Development.",
+    "keywords": ["elective", "electives", "subjects", "fifth semester", "Artificial Intelligence", "Machine Learning", "Data Science", "Cloud Computing", "Cyber Security", "Mobile Application Development"]
+  },
+  {
+    "id": 14,
+    "category": "Courses",
+    "question": "What is the attendance requirement?",
+    "answer": "Students must maintain a minimum of 75% attendance in each subject to be eligible to appear for the end-semester examinations. Students with less than 75% attendance may be detained.",
+    "keywords": ["attendance", "requirement", "75%", "subject", "end-semester examinations", "eligible", "detained"]
+  },
+  {
+    "id": 15,
+    "category": "Courses",
+    "question": "Are practical sessions conducted?",
+    "answer": "Yes, practical laboratory sessions are a mandatory part of the curriculum. Laboratories include Programming Lab, Database Lab, Networking Lab, and Project Work. Practical sessions are conducted weekly as per the timetable.",
+    "keywords": ["practical", "sessions", "laboratory", "mandatory", "curriculum", "Programming Lab", "Database Lab", "Networking Lab", "Project Work", "weekly", "timetable"]
+  },
+  {
+    "id": 16,
+    "category": "Examinations",
+    "question": "How can I apply for the semester examination?",
+    "answer": "Students must fill the examination application form online through the student portal before the deadline announced each semester. The hall ticket is issued only after successful submission of the application and clearance of dues.",
+    "keywords": ["apply", "semester examination", "application form", "student portal", "deadline", "hall ticket", "dues", "online"]
+  },
+  {
+    "id": 17,
+    "category": "Examinations",
+    "question": "When are the examination schedules released?",
+    "answer": "The end-semester examination timetable is published on the college website and notice board two weeks before the examinations begin. Internal assessment schedules are announced by individual faculty members.",
+    "keywords": ["examination schedule", "released", "timetable", "college website", "notice board", "two weeks", "examinations", "internal assessment"]
+  },
+  {
+    "id": 18,
+    "category": "Examinations",
+    "question": "How do I get my hall ticket?",
+    "answer": "Hall tickets can be downloaded from the student portal after submitting the examination application. Students must carry a printed hall ticket and a valid college ID to the examination hall.",
+    "keywords": ["hall ticket", "download", "student portal", "examination application", "college ID", "examination hall"]
+  },
+  {
+    "id": 19,
+    "category": "Examinations",
+    "question": "What are the passing criteria?",
+    "answer": "A student must secure a minimum of 40% marks in each subject (theory and practical separately) and an aggregate of 50% to pass a semester. Internal assessment carries 30% weightage and end-semester examination carries 70%.",
+    "keywords": ["passing criteria", "40%", "marks", "subject", "theory", "practical", "aggregate", "50%", "pass", "semester", "internal assessment", "end-semester examination", "70%", "30%"]
+  },
+  {
+    "id": 20,
+    "category": "Examinations",
+    "question": "Can I apply for revaluation?",
+    "answer": "Yes, students may apply for revaluation of their answer scripts within 10 days of the result declaration by submitting a revaluation application and paying the prescribed fee per subject.",
+    "keywords": ["revaluation", "apply", "answer scripts", "10 days", "result declaration", "fee", "subject"]
+  },
+  {
+    "id": 21,
+    "category": "Examinations",
+    "question": "Are supplementary examinations conducted?",
+    "answer": "Yes, supplementary examinations are conducted for students who fail in one or more subjects. Applications for supplementary exams must be submitted within 15 days of result declaration.",
+    "keywords": ["supplementary", "examinations", "conducted", "fail", "subjects", "15 days", "result declaration", "application"]
+  },
+  {
+    "id": 22,
+    "category": "Examinations",
+    "question": "When are results declared?",
+    "answer": "Semester examination results are declared within 45 days of the last examination and are published on the college student portal. Students receive SMS and email notifications when results are available.",
+    "keywords": ["results", "declared", "45 days", "last examination", "student portal", "SMS", "email", "notifications"]
+  },
+  {
+    "id": 23,
+    "category": "Placements",
+    "question": "Who is eligible for campus placements?",
+    "answer": "Students in the final year of B.Tech or M.Tech with no active backlogs, a minimum cumulative GPA of 6.0, and at least 75% attendance are eligible to register for campus placement drives.",
+    "keywords": ["eligible", "campus placements", "final year", "B.Tech", "M.Tech", "backlogs", "GPA", "6.0", "attendance", "placement drives"]
+  },
+  {
+    "id": 24,
+    "category": "Placements",
+    "question": "How does campus recruitment work?",
+    "answer": "The placement cell invites companies to campus for recruitment. The process includes pre-placement talks, written tests, group discussions, and interviews. Placement drives are held from August to March each year.",
+    "keywords": ["campus recruitment", "work", "placement cell", "companies", "pre-placement talks", "written tests", "group discussions", "interviews", "August", "March"]
+  },
+  {
+    "id": 25,
+    "category": "Placements",
+    "question": "Are internship opportunities available?",
+    "answer": "Yes, the department facilitates summer internships after the sixth semester and final-year industry projects. The placement cell assists students in securing internships with partner companies.",
+    "keywords": ["internship", "opportunities", "available", "summer internships", "sixth semester", "final-year", "industry projects", "placement cell", "partner companies"]
+  },
+  {
+    "id": 26,
+    "category": "Placements",
+    "question": "Does the college provide placement training?",
+    "answer": "Yes, the college conducts placement training from the third year, including aptitude training, soft skills development, technical mock interviews, resume-building workshops, and coding practice sessions.",
+    "keywords": ["placement training", "college", "third year", "aptitude training", "soft skills", "technical mock interviews", "resume-building", "coding practice", "sessions"]
+  },
+  {
+    "id": 27,
+    "category": "Placements",
+    "question": "Which companies visit for recruitment?",
+    "answer": "Recruiters include IT and software companies such as Infosys, TCS, Wipro, Cognizant, Accenture, and HCL, along with startups and core engineering firms. The list of recruiters varies each year.",
+    "keywords": ["companies", "recruiters", "visit", "recruitment", "Infosys", "TCS", "Wipro", "Cognizant", "Accenture", "HCL", "startups", "core engineering firms"]
+  },
+  {
+    "id": 28,
+    "category": "Placements",
+    "question": "How can I prepare my resume?",
+    "answer": "The placement cell offers resume-building workshops and reviews student resumes before placement drives. Students are advised to highlight academic projects, technical skills, internships, and certifications.",
+    "keywords": ["prepare", "resume", "placement cell", "workshops", "reviews", "placement drives", "academic projects", "technical skills", "internships", "certifications"]
+  },
+  {
+    "id": 29,
+    "category": "Placements",
+    "question": "What is the interview procedure?",
+    "answer": "The interview procedure typically includes an online aptitude test, followed by a technical interview and an HR interview. Shortlisted candidates proceed through each round based on performance.",
+    "keywords": ["interview", "procedure", "online aptitude test", "technical interview", "HR interview", "shortlisted", "performance", "rounds"]
+  }
+]

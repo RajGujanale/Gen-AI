@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Assisted Software Testing Support System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </style>
+    <style>
+        :root {
+            --primary: #1f3a5f;
+            --primary-dark: #162a44;
+            --accent: #2e86ab;
+            --light: #f4f7fb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --muted: #6b7280;
+            --card: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .bg-primary { background: var(--primary); }
+        .bg-primary-dark { background: var(--primary-dark); }
+        .bg-white { background: var(--card); }
+        .text-primary { color: var(--primary); }
+        .text-muted { color: var(--muted); }
+        .border-primary { border: 1px solid var(--primary); }
+        .border-muted { border: 1px solid var(--border); }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: 1.5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: var(--primary); color: white; }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-success:hover { opacity: 0.9; }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover { opacity: 0.9; }
+
+        .chip {
+            background: white;
+            border: 1.5px solid var(--border);
+            color: var(--primary);
+            padding: 0.4rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .chip:hover { border-color: var(--primary); color: white; background: var(--primary); }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .status-pass { background: #d1e7dd; color: #0f5132; }
+        .status-fail { background: #f8d7da; color: #842029; }
+        .status-blocked { background: #fff3cd; color: #664303; }
+        .status-not-executed { background: #e2e6ea; color: #6c757d; }
+
+        .req-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .req-card:hover { border-color: var(--primary); }
+
+        .tab-trigger {
+            all: unset;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+        .tab-trigger:hover { color: var(--primary); }
+        .tab-trigger.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #afbcc8; border-radius: 3px; }
+
+        /* Focus styles */
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="border-b border-border bg-primary/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2h2a2 2 0 002 2m2.067-1.958c.956.817 1.807 1.5 2.579 2.082a4.5 4.5 0 01.098 1.465l.038.331a4.5 4.5 0 001.438 1.227h2.155c.77 0 1.382-.35 1.893-.973l.045-.289c.686-.568.938-1.34 1.008-2.173a8.05 8.05 0 00.395-2.085c0-1.328-.09-2.56-.26-3.735a6.098 6.098 0 00-1.52-.883l-.054-.343c-1.32-.967-2.708-1.593-4.36-1.593-1.693 0-3.09.658-4.188 1.67-1.15.805-2.067 1.358-3.328 1.535-2.074.28-3.808.61-4.954.837-.826.145-1.64.26-2.44.26-.88 0-1.72-.077-2.512-.225a5.82 5.82 0 00-.933-.588z"/>
+                    </path>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-primary">AI Testing Support</h1>
+                    <p class="text-sm text-muted">Online Shopping System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-muted" id="user-count">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6">
+
+        <!-- Header Section -->
+        <header class="mb-6 animate-fade-in-up">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary mb-1">Generate Test Cases</h2>
+                    <p class="text-muted">Enter functional requirements to generate structured test cases</p>
+                </div>
+                <div class="self-center">
+                    <button class="btn-primary" onclick="loadSampleRequirements()">Load Sample Requirements</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Requirements Input -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="req-card p-4">
+                <h3 class="font-semibold text-primary mb-3">Functional Requirements</h3>
+                <textarea id="requirements-text" rows="8" cols="100"
+                    class="w-full px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                    placeholder="FR-01: User Registration - The system shall allow new users to register using valid details such as name, email address, and password.
+FR-02: User Login - The system shall authenticate registered users using valid credentials and reject invalid credentials.
+FR-03: Product Search - The system shall allow users to search for products by name or keyword and display relevant results.
+FR-04: Add to Cart - The system shall allow users to add available products to the shopping cart and update product quantities.
+FR-05: Checkout - The system shall validate the delivery address and required checkout information before allowing an order to be placed.
+FR-06: Order Placement - The system shall create an order when all required checkout conditions are satisfied and payment is successfully completed.
+FR-07: Input Validation - The system shall reject invalid inputs, missing mandatory fields, and values outside the permitted limits."></textarea>
+            </div>
+        </section>
+
+        <!-- Generate Button -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex gap-3">
+                <button id="generate-btn" class="btn-primary flex-1">Generate Test Cases with AI</button>
+                <button id="clear-btn" class="btn-secondary">Clear</button>
+            </div>
+        </section>
+
+        <!-- Test Cases Table -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div class="flex justify-between align-items-center mb-4">
+                <h3 class="font-semibold text-primary">Generated Test Cases</h3>
+                <span id="cases-count" class="text-muted">0 test cases</span>
+            </div>
+            <div id="test-cases-container" class="overflow-x-auto rounded-lg border border-border">
+                <p class="text-muted p-8 text-center" id="no-cases-msg">Enter requirements and click generate to display test cases</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="mb-6 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl">
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-pass">
+                    <div class="text-3x font-bold text-success" id="pass-count">0</div>
+                    <div class="text-sm text-muted mt-1">Passed</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-fail">
+                    <div class="text-3x font-bold text-error" id="fail-count">0</div>
+                    <div class="text-sm text-muted mt-1">Failed</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-blocked">
+                    <div class="text-3x font-bold text-warning" id="blocked-count">0</div>
+                    <div class="text-sm text-muted mt-1">Blocked</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-border shadow-sm" id="summary-not-executed">
+                    <div class="text-3x font-bold text-muted" id="not-executed-count">0</div>
+                    <div class="text-sm text-muted mt-1">Not Executed</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="pt-6 animate-fade-in-up" style="animation-delay: 0.5s;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
+                <button id="export-csv-btn" class="btn-primary w-full" disabled>Export as CSV</button>
+                <button id="export-json-btn" class="btn-secondary w-full" disabled>Export as JSON</button>
+                <button id="clear-all-btn" class="btn-danger w-full">Clear All</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Test Case Modal -->
+    <div id="test-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title">Test Case Details</h3>
+                <button id="close-modal" aria-label="Close" onclick="closeTestModal()"
+                    class="text-muted hover:text-primary transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18M6 6l12 12"/>
+                    </path>
+                </button>
+            </div>
+            <div id="modal-body">
+                <!-- Test case details will be populated here -->
+            </div>
+            <div class="pt-4 border-t border-border flex justify-end gap-2">
+                <button class="btn-secondary px-4" onclick="closeTestModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA: Functional Requirements =====
+        const FUNCTIONAL_REQUIREMENTS = {
+            "FR-01": "User Registration - The system shall allow new users to register using valid details such as name, email address, and password.",
+            "FR-02": "User Login - The system shall authenticate registered users using valid credentials and reject invalid credentials.",
+            "FR-03": "Product Search - The system shall allow users to search for products by name or keyword and display relevant results.",
+            "FR-04": "Add to Cart - The system shall allow users to add available products to the shopping cart and update product quantities.",
+            "FR-05": "Checkout - The system shall validate the delivery address and required checkout information before allowing an order to be placed.",
+            "FR-06": "Order Placement - The system shall create an order when all required checkout conditions are satisfied and payment is successfully completed.",
+            "FR-07": "Input Validation - The system shall reject invalid inputs, missing mandatory fields, and values outside the permitted limits."
+        };
+
+        // ===== TEST CASE GENERATOR (Rule-based, no API needed) =====
+        function parseRequirements(reqText) {
+            const requirements = {};
+            const lines = reqText.split('\n').filter(l => l.trim());
+            for (const line of lines) {
+                const match = line.match(/^(FR-\d+):\s*(.+)$/);
+                if (match) {
+                    requirements[match[1]] = match[2];
+                }
+            }
+            return requirements;
+        }
+
+        function classifyScenario(scenario) {
+            const text = scenario.toLowerCase();
+            if (text.includes('invalid') || text.includes('reject') || text.includes('error') || 
+                text.includes('missing') || text.includes('failed') || text.includes('above') || 
+                text.includes('below') || text.includes('maximum') || text.includes('minimum')) {
+                if (text.includes('boundary') || text.includes('minim') || text.includes('maxim') || 
+                    text.includes('limit') || text.includes('permitted')) {
+                    return 'boundary-value';
+                }
+                return 'negative';
+            }
+            return 'positive';
+        }
+
+        function generateTestCases(requirements) {
+            const testCases = [];
+            let tcId = 1;
+
+            for (const [reqId, reqDesc] of Object.entries(requirements)) {
+                const descLower = reqDesc.toLowerCase();
+
+                if (descLower.includes('registration')) {
+                    // TC-001: Registration valid
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Registration with valid details',
+                        preconditions: 'User is on registration page with no existing account',
+                        input_data: 'Name: "John Doe"; Email: "john.doe@example.com"; Password: "SecurePass123"',
+                        test_steps: ['Navigate to registration page', 'Enter valid name, email, password', 'Click "Register" button'],
+                        expected_result: 'User redirected to welcome page; account created with status "active"; confirmation email sent',
+                        classification: 'positive'
+                    });
+                    tcId++;
+
+                    // TC-002: Registration invalid email
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Registration with invalid email address',
+                        preconditions: 'User is on registration page',
+                        input_data: 'Name: "John Doe"; Email: "invalid-email"; Password: "SecurePass123"',
+                        test_steps: ['Navigate to registration page', 'Enter valid name, invalid email, password', 'Click "Register" button'],
+                        expected_result: 'Error message: "Please enter a valid email address"; user record NOT created',
+                        classification: 'negative'
+                    });
+                    tcId++;
+
+                    // TC-003: Registration missing fields
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Registration with missing mandatory fields',
+                        preconditions: 'User is on registration page',
+                        input_data: 'Name: "" (empty); Email: "john@example.com"; Password: "" (empty)',
+                        test_steps: ['Navigate to registration page', 'Leave name empty, enter valid email, leave password empty', 'Click "Register" button'],
+                        expected_result: 'Error messages for empty fields; form NOT submitted; user must correct all mandatory fields',
+                        classification: 'negative'
+                    });
+                    tcId++;
+                }
+
+                if (descLower.includes('login')) {
+                    // TC-004: Login valid
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Login with valid credentials',
+                        preconditions: 'User has existing account',
+                        input_data: 'Email: "john.doe@example.com"; Password: "SecurePass123"',
+                        test_steps: ['Navigate to login page', 'Enter valid email and password', 'Click "Login" button'],
+                        expected_result: 'User redirected to homepage; welcome message displayed; session established',
+                        classification: 'positive'
+                    });
+                    tcId++;
+
+                    // TC-005: Login incorrect password
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Login with incorrect password',
+                        preconditions: 'User has existing account',
+                        input_data: 'Email: "john.doe@example.com"; Password: "WrongPassword"',
+                        test_steps: ['Navigate to login page', 'Enter valid email and incorrect password', 'Click "Login" button'],
+                        expected_result: 'Error message: "Invalid credentials"; user remains on login page; account NOT locked (first failure)',
+                        classification: 'negative'
+                    });
+                    tcId++;
+
+                    // TC-006: Account lockout
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Account lockout after 5 failed login attempts',
+                        preconditions: 'User has existing account',
+                        input_data: 'Valid email; 5+ attempts with incorrect passwords',
+                        test_steps: ['Navigate to login page', 'Enter valid email and incorrect password 5 times', 'On 6th attempt, enter incorrect password'],
+                        expected_result: 'After 5 failures: "Account locked. Try again in 30 minutes."; 6th attempt blocks login',
+                        classification: 'negative'
+                    });
+                    tcId++;
+                }
+
+                if (descLower.includes('product search') || reqId === 'FR-03') {
+                    // TC-007: Search existing product
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Searching for an existing product',
+                        preconditions: 'User is on product catalog page',
+                        input_data: 'Search keyword: "wireless headphones"',
+                        test_steps: ['Enter search keyword in field', 'Press Enter or click search icon', 'Observe results'],
+                        expected_result: 'Product list displays items matching search term; pagination if >20 results',
+                        classification: 'positive'
+                    });
+                    tcId++;
+
+                    // TC-008: Search non-existent product
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Searching for a product that does not exist',
+                        preconditions: 'User is on product catalog page',
+                        input_data: 'Search keyword: "xyzabc123non existent product"',
+                        test_steps: ['Enter search keyword in field', 'Press Enter or click search icon', 'Observe results'],
+                        expected_result: 'No products found message: "We could not find any products matching your search."',
+                        classification: 'negative'
+                    });
+                    tcId++;
+                }
+
+                if (descLower.includes('add to cart') || reqId === 'FR-04') {
+                    // TC-009: Add available product
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Adding an available product to the cart',
+                        preconditions: 'User is logged in; product page displays item with available stock',
+                        input_data: 'Product: "Blue T-Shirt" (price $29.99, stock 50); Quantity: 1',
+                        test_steps: ['Navigate to product page', 'Select quantity 1', 'Click "Add to Cart" button', 'Observe cart update'],
+                        expected_result: 'Product added confirmation; cart icon updates to show 1 item; cart subtotal $29.99',
+                        classification: 'positive'
+                    });
+                    tcId++;
+
+                    // TC-010: Add unavailable product
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Attempting to add an unavailable product to the cart',
+                        preconditions: 'User is logged in; product page displays item with zero stock',
+                        input_data: 'Product: "Limited Edition Watch"; stock 0; Quantity: 1',
+                        test_steps: ['Navigate to product page', 'Select quantity 1', 'Click "Add to Cart" button', 'Observe response'],
+                        expected_result: 'Error: "Sorry, this item is currently out of stock"; product NOT added to cart; cart unchanged',
+                        classification: 'negative'
+                    });
+                    tcId++;
+
+                    // TC-011: Quantity minimum
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Entering quantity at permitted minimum',
+                        preconditions: 'Product added to cart; cart page displayed',
+                        input_data: 'Product: "Cotton Sheets" (max 4 per customer); Quantity: 1',
+                        test_steps: ['Add product to cart', 'Modify quantity field to 1', 'Observe cart updates'],
+                        expected_result: 'Quantity set to 1 (minimum permitted); cart updates without error',
+                        classification: 'boundary-value'
+                    });
+                    tcId++;
+
+                    // TC-012: Quantity maximum
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Entering quantity above available stock or permitted maximum',
+                        preconditions: 'Product added to cart; cart page displayed',
+                        input_data: 'Product: "Premium Coffee Mugs" (stock 8, limit 3 per customer); Quantity: 5',
+                        test_steps: ['Add product to cart', 'Modify quantity to 5', 'Observe cart updates and error messages'],
+                        expected_result: 'Error: "Maximum 3 items per customer"; quantity automatically reduced to 3; error displayed prominently',
+                        classification: 'boundary-value'
+                    });
+                    tcId++;
+                }
+
+                if (descLower.includes('checkout') || reqId === 'FR-05') {
+                    // TC-013: Checkout valid
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Completing checkout with valid details',
+                        preconditions: 'User has items in cart; valid shipping/billing information',
+                        input_data: 'Shipping: Name "John Doe", Address "123 Main St", City "Springfield", State "CA", Postal "90210", Country "USA"',
+                        test_steps: ['Add items to cart', 'Click "Checkout"', 'Enter valid shipping/billing info', 'Click "Place Order"'],
+                        expected_result: 'Order confirmation page; order number generated; confirmation email sent; inventory decremented; cart emptied',
+                        classification: 'positive'
+                    });
+                    tcId++;
+
+                    // TC-014: Checkout missing address
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Attempting checkout with missing delivery address',
+                        preconditions: 'User has items in cart; incomplete shipping information',
+                        input_data: 'Shipping Name: "" (empty); Address Line 1: "456 Oak Ave"; City: "" (empty); State: "" (empty); Postal Code: "" (empty)',
+                        test_steps: ['Start checkout', 'Leave required fields empty', 'Click "Place Order"'],
+                        expected_result: 'Validation error prevents submission; error messages for empty required fields; "Place Order" button remains disabled',
+                        classification: 'negative'
+                    });
+                    tcId++;
+
+                    // TC-015: Payment failure
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Attempting to place order when payment fails',
+                        preconditions: 'Valid cart and checkout info; payment gateway declines or unavailable',
+                        input_data: 'Cart: 1 item; Payment: Declined/Simulated failure',
+                        test_steps: ['Complete checkout form', 'Submit payment (simulated decline)', 'Click "Place Order"'],
+                        expected_result: 'Payment failure error displays; order NOT created; user returned to payment screen; cart preserved for retry',
+                        classification: 'negative'
+                    });
+                    tcId++;
+                }
+
+                if (descLower.includes('input validation') || reqId === 'FR-07') {
+                    // TC-016: Invalid email
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Reject invalid email format during registration',
+                        preconditions: 'User is on registration page',
+                        input_data: 'Email: "johnexample.com" (missing "@" symbol)',
+                        test_steps: ['Navigate to registration page', 'Enter valid name, invalid email (no "@"), password', 'Click "Register"'],
+                        expected_result: 'Error: "Please enter a valid email address"; form NOT submitted; user record NOT created',
+                        classification: 'negative'
+                    });
+                    tcId++;
+
+                    // TC-017: Short password
+                    testCases.push({
+                        id: `TC-${tcId.toString().padStart(3, '0')}`,
+                        requirement_id: reqId,
+                        scenario: 'Reject password below minimum length',
+                        preconditions: 'User is on registration page',
+                        input_data: 'Password: "short" (5 characters)',
+                        test_steps: ['Navigate to registration page', 'Enter valid name, valid email, short password', 'Click "Register"'],
+                        expected_result: 'Error: "Password must be at least 8 characters"; form NOT submitted; focus moves to password field',
+                        classification: 'negative'
+                    });
+                    tcId++;
+                }
+            }
+
+            return testCases;
+        }
+
+        // ===== RENDER FUNCTIONS =====
+        function displayTestCases(testCases) {
+            const container = document.getElementById('test-cases-container');
+            const noCasesMsg = document.getElementById('no-cases-msg');
+
+            if (testCases.length === 0) {
+                container.innerHTML = '';
+                noCasesMsg.style.display = 'block';
+                return;
+            }
+
+            noCasesMsg.style.display = 'none';
+
+            let html = '';
+            testCases.forEach(tc => {
+                const cls = tc.classification.replace(/-./, c => c.toUpperCase());
+                html += `
+                    <div class="p-3 border-b border-border hover:bg-primary/5 transition-colors cursor-pointer" 
+                         onclick="showTestModal(${JSON.stringify(tc)})">
+                        <div class="flex items-start gap-3">
+                            <span class="status-badge status-${tc.classification}" 
+                                  style="background: ${cls.toLowerCase() === 'positive' ? '#d1e7dd' : cls.toLowerCase() === 'negative' ? '#f8d7da' : '#fff3cd'}">
+                                ${tc.classification}
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium truncate" style="max-width: 200px;">${tc.scenario}</p>
+                                <p class="text-xs text-muted truncate" style="max-width: 200px;">${tc.id}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateSummary(testCases, results) {
+            const passed = results.passed || 0;
+            const failed = results.failed || 0;
+            const blocked = results.blocked || 0;
+            const notExecuted = results.not_executed || 0;
+            const total = passed + failed + blocked + notExecuted;
+
+            document.getElementById('pass-count').textContent = passed;
+            document.getElementById('fail-count').textContent = failed;
+            document.getElementById('blocked-count').textContent = blocked;
+            document.getElementById('not-executed-count').textContent = notExecuted;
+
+            document.getElementById('cases-count').textContent = `${testCases.length} test cases`;
+        }
+
+        // ===== MODAL FUNCTIONS =====
+        function showTestModal(testCase) {
+            const modal = document.getElementById('test-modal');
+            const modalBody = document.getElementById('modal-body');
+            const modalTitle = document.getElementById('modal-title');
+
+            modalTitle.textContent = `Test Case ${testCase.id}`;
+
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-medium text-muted">Test Case ID:</p>
+                        <p class="font-mono text-primary" id="modal-tc-id">${testCase.id}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Requirement ID:</p>
+                        <p class="font-mono" id="modal-req-id">${testCase.requirement_id}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Test Scenario:</p>
+                        <p class="font-medium" id="modal-scenario">${testCase.scenario}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Classification:</p>
+                        <span class="chip" id="modal-classification">${testCase.classification}</span>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Preconditions:</p>
+                        <p class="text-muted break-all" id="modal-preconditions">${testCase.preconditions}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Input Data:</p>
+                        <p class="text-muted break-all" id="modal-input-data">${testCase.input_data}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Expected Result:</p>
+                        <p class="text-primary break-all" id="modal-expected-result">${testCase.expected_result}</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-muted">Test Steps:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-sm" id="modal-test-steps">
+                        </ol>
+                    </div>
+                </div>
+            `;
+
+            // Populate test steps
+            const stepsList = document.getElementById('modal-test-steps');
+            testCase.test_steps.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                stepsList.appendChild(li);
+            });
+
+            modal.classList.add('active');
+
+            // Set up actual result input and status buttons
+            const actualResultInput = document.getElementById('actual-result-input');
+            const statusButtons = modalBody.querySelectorAll('.status-btn');
+
+            // Remove any existing status buttons to avoid duplication
+            const existingStatusButtons = modalBody.querySelectorAll('.status-btn');
+            existingStatusButtons.forEach(btn => btn.remove());
+
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'pt-3 flex justify-end gap-2';
+            statusDiv.innerHTML = `
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Pass')">Pass</button>
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Fail')">Fail</button>
+                <button class="btn-secondary flex-1" onclick="updateTestStatus('Blocked')">Blocked</button>
+            `;
+
+            // Clear any existing actual result input in modal
+            const existingActual = modalBody.querySelector('#actual-result-input');
+            if (existingActual) existingActual.remove();
+
+            const actualInput = document.createElement('input');
+            actualInput.type = 'text';
+            actualInput.id = 'actual-result-input';
+            actualInput.className = 'w-full px-4 py-3 rounded-lg border border-border mt-3 focus:outline-none focus:ring-2 focus:ring-primary/20';
+            actualInput.placeholder = 'Enter actual result observed';
+
+            modalBody.appendChild(actualInput);
+            modalBody.appendChild(statusDiv);
+        }
+
+        function closeTestModal() {
+            document.getElementById('test-modal').classList.remove('active');
+        }
+
+        function updateTestStatus(status) {
+            // This will be handled by the main script after modal close
+            const actualResultInput = document.getElementById('actual-result-input');
+            if (actualResultInput) {
+                actualResultInput.value = '';
+            }
+            closeTestModal();
+            alert(`Test status updated to: ${status}`);
+        }
+
+        // ===== EXPORT FUNCTIONS =====
+        function exportToCSV(testCases, results) {
+            const fieldnames = ['Test Case ID', 'Requirement ID', 'Test Scenario',
+                'Preconditions', 'Input Data', 'Test Steps',
+                'Expected Result', 'Actual Result', 'Test Status', 'Defect ID or Remarks'];
+
+            let csv = fieldnames.join(',') + '\r\n';
+            testCases.forEach(tc => {
+                csv += [
+                    tc.id,
+                    tc.requirement_id,
+                    tc.scenario,
+                    tc.preconditions,
+                    tc.input_data,
+                    tc.test_steps.join('; '),
+                    tc.expected_result,
+                    tc.actual_result || '',
+                    tc.test_status || 'Not Executed',
+                    tc.defect_id || ''
+                ].join(',') + '\r\n';
+            });
+
+            // Trigger download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `test_cases_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function exportToJSON(testCases, results) {
+            const data = {
+                generated_at: new Date().toISOString(),
+                requirements_analyzed: testCases.length,
+                test_cases: testCases,
+                summary: results
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `test_report_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load sample requirements on startup
+            loadSampleRequirements();
+
+            // Generate test cases button
+            document.getElementById('generate-btn').addEventListener('click', function() {
+                const requirementsText = document.getElementById('requirements-text').value.trim();
+                if (!requirementsText) {
+                    alert('Please enter or load functional requirements first.');
+                    return;
+                }
+
+                // Parse requirements
+                const requirements = parseRequirements(requirementsText);
+                if (Object.keys(requirements).length === 0) {
+                    alert('No valid requirements found (expected format: FR-01: description)');
+                    return;
+                }
+
+                // Generate test cases
+                const testCases = generateTestCases(requirements);
+
+                // Display test cases
+                displayTestCases(testCases);
+
+                // Update summary (all not executed initially)
+                updateSummary(testCases, {
+                    total: testCases.length,
+                    passed: 0,
+                    failed: 0,
+                    blocked: 0,
+                    not_executed: testCases.length
+                });
+
+                // Enable export buttons
+                document.getElementById('export-csv-btn').disabled = false;
+                document.getElementById('export-json-btn').disabled = false;
+            });
+
+            // Clear button
+            document.getElementById('clear-btn').addEventListener('click', function() {
+                document.getElementById('requirements-text').value = '';
+                document.getElementById('test-cases-container').innerHTML = '<p class="text-muted p-8 text-center">Enter requirements and click generate to display test cases</p>';
+                document.getElementById('cases-count').textContent = '0 test cases';
+                document.getElementById('export-csv-btn').disabled = true;
+                document.getElementById('export-json-btn').disabled = true;
+                document.getElementById('pass-count').textContent = '0';
+                document.getElementById('fail-count').textContent = '0';
+                document.getElementById('blocked-count').textContent = '0';
+                document.getElementById('not-executed-count').textContent = '0';
+            });
+
+            // Export CSV
+            document.getElementById('export-csv-btn').addEventListener('click', function() {
+                const testCases = JSON.parse(localStorage.getItem('generatedTestCases') || '[]');
+                const results = JSON.parse(localStorage.getItem('testResults') || '{"total":0,"passed":0,"failed":0,"blocked":0,"not_executed":0}');
+                if (testCases.length > 0) {
+                    exportToCSV(testCases, results);
+                } else {
+                    alert('No test cases to export. Generate test cases first.');
+                }
+            });
+
+            // Export JSON
+            document.getElementById('export-json-btn').addEventListener('click', function() {
+                const testCases = JSON.parse(localStorage.getItem('generatedTestCases') || '[]');
+                const results = JSON.parse(localStorage.getItem('testResults') || '{"total":0,"passed":0,"failed":0,"blocked":0,"not_executed":0}');
+                if (testCases.length > 0) {
+                    exportToJSON(testCases, results);
+                } else {
+                    alert('No test cases to export. Generate test cases first.');
+                }
+            });
+
+            // Clear all
+            document.getElementById('clear-all-btn').addEventListener('click', function() {
+                if (confirm('Clear all generated test cases and results?')) {
+                    clearAll();
+                }
+            });
+        });
+
+        function clearAll() {
+            document.getElementById('requirements-text').value = '';
+            document.getElementById('test-cases-container').innerHTML = '<p class="text-muted p-8 text-center">Enter requirements and click generate to display test cases</p>';
+            document.getElementById('cases-count').textContent = '0 test cases';
+            document.getElementById('export-csv-btn').disabled = true;
+            document.getElementById('export-json-btn').disabled = true;
+            document.getElementById('pass-count').textContent = '0';
+            document.getElementById('fail-count').textContent = '0';
+            document.getElementById('blocked-count').textContent = '0';
+            document.getElementById('not-executed-count').textContent = '0';
+
+            // Clear localStorage
+            localStorage.removeItem('generatedTestCases');
+            localStorage.removeItem('testResults');
+
+            alert('All data cleared.');
+        }
+
+        // Helper: load sample requirements
+        function loadSampleRequirements() {
+            const sample = `FR-01: User Registration - The system shall allow new users to register using valid details such as name, email address, and password.
+FR-02: User Login - The system shall authenticate registered users using valid credentials and reject invalid credentials.
+FR-03: Product Search - The system shall allow users to search for products by name or keyword and display relevant results.
+FR-04: Add to Cart - The system shall allow users to add available products to the shopping cart and update product quantities.
+FR-05: Checkout - The system shall validate the delivery address and required checkout information before allowing an order to be placed.
+FR-06: Order Placement - The system shall create an order when all required checkout conditions are satisfied and payment is successfully completed.
+FR-07: Input Validation - The system shall reject invalid inputs, missing mandatory fields, and values outside the permitted limits.`;
+            document.getElementById('requirements-text').value = sample;
+        }
+    </script>
+</body>
+</html>

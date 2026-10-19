@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Department FAQ Chatbot</title>
+<style>
+  :root {
+    --primary: #1f3a5f;
+    --primary-dark: #162a44;
+    --accent: #2e86ab;
+    --light: #f4f7fb;
+    --bubble-user: #1f3a5f;
+    --bubble-user-text: #ffffff;
+    --bubble-bot: #ffffff;
+    --bubble-bot-text: #1a1a1a;
+    --border: #d7dde5;
+    --muted: #5b6b7c;
+    --shadow: 0 4px 20px rgba(31, 58, 95, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--light);
+    color: #1a1a1a;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Header */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  header .college { font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; color: #b8c4d6; margin-bottom: 0.25rem; }
+  header h1 { font-size: 1.35rem; font-weight: 700; }
+  header p { font-size: 0.9rem; color: #d7e2ee; margin-top: 0.25rem; }
+  @media (min-width: 768px) {
+    header h1 { font-size: 1.5rem; }
+  }
+  /* Main chat area */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem 0.75rem 0.75rem;
+    overflow: hidden;
+  }
+  @media (min-width: 768px) { main { padding: 1.5rem 1rem 1rem; } }
+  /* Welcome banner */
+  #welcome-banner {
+    background: var(--bubble-bot);
+    border-left: 4px solid var(--accent);
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    font-size: 0.92rem;
+    color: #243342;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    animation: fadeIn 0.4s ease;
+  }
+  #welcome-banner strong { color: var(--primary); }
+  /* Chat window */
+  #chat-window {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding-right: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #afbcc8 var(--light);
+  }
+  #chat-window::-webkit-scrollbar { width: 6px; }
+  #chat-window::-webkit-scrollbar-track { background: transparent; }
+  #chat-window::-webkit-scrollbar-thumb { background: #afbcc8; border-radius: 3px; }
+  .msg { display: flex; flex-direction: column; max-width: 82%; animation: fadeIn 0.3s ease; }
+  .msg.user { align-self: flex-end; }
+  .msg.bot { align-self: flex-start; }
+  .msg .bubble {
+    padding: 0.75rem 0.95rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    position: relative;
+  }
+  .msg.user .bubble {
+    background: var(--bubble-user);
+    color: var(--bubble-user-text);
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 6px rgba(31,58,95,0.18);
+  }
+  .msg.bot .bubble {
+    background: var(--bubble-bot);
+    color: var(--bubble-bot-text);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .msg .meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    margin-bottom: 0.1rem;
+  }
+  .msg.user .meta { text-align: right; margin-right: 6px; }
+  .msg.bot .meta { text-align: left; margin-left: 6px; }
+  /* Suggested questions */
+  #suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0 0.75rem;
+  }
+  .chip {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--primary);
+    padding: 0.5rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .chip:active { transform: translateY(-1px); }
+  /* Loading indicator */
+  #loader {
+    align-self: flex-start;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.6rem 0.95rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    max-width: 82%;
+    margin-bottom: 0.5rem;
+  }
+  #loader.show { display: flex; }
+  .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  .loader-text { font-size: 0.8rem; color: var(--muted); }
+  @keyframes bounce { 0%,80%,100%{transform:scale(0.9);opacity:0.7} 40%{transform:scale(1.2);opacity:1} }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+  /* Input area */
+  #input-area {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.45rem 0.6rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: border-color 0.2s;
+  }
+  #input-area:focus-within { border-color: var(--accent); }
+  #user-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    background: transparent;
+  }
+  #user-input::placeholder { color: var(--muted); }
+  #send-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  #send-btn:hover { background: var(--primary-dark); }
+  #send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  #send-btn svg { width: 20px; height: 20px; fill: #fff; }
+  /* Clear / restart */
+  #controls {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  #clear-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #clear-btn:hover { background: #fdecea; border-color: #e4574e; color: #c0392b; }
+  /* Disclaimer */
+  #disclaimer {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    font-size: 0.72rem;
+    color: #8a97a8;
+    text-align: center;
+    line-height: 1.4;
+    border-top: 1px solid #e3e9f0;
+  }
+  /* Empty state */
+  #empty-state {
+    align-self: center;
+    text-align: center;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    display: none;
+  }
+  #empty-state p { margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="college">Sunrise Valley College of Engineering &amp; Technology</div>
+  <h1>Department of Computer Science and Engineering</h1>
+  <p>FAQ Chatbot &mdash; Admissions &bull; Courses &bull; Examinations &bull; Placements</p>
+</header>
+
+<main>
+  <section id="welcome-banner" role="region" aria-label="Welcome">
+    <strong>Welcome!</strong> I'm the virtual assistant for the Department of Computer Science and Engineering. I can answer questions about admissions, courses, examinations, and placements based on our FAQ knowledge base. Ask me anything!
+  </section>
+
+  <div id="suggestions" aria-label="Suggested questions">
+    <div class="chip" onclick="askSuggested('What are the eligibility criteria for admission?')">Admission eligibility</div>
+    <div class="chip" onclick="askSuggested('Which courses are offered by the department?')">Courses offered</div>
+    <div class="chip" onclick="askSuggested('How can I apply for the semester examination?')">Apply for exam</div>
+    <div class="chip" onclick="askSuggested('Does the college provide placement training?')">Placement training</div>
+    <div class="chip" onclick="askSuggested('What are the admission deadlines?')">Admission deadlines</div>
+    <div class="chip" onclick="askSuggested('What documents are required for admission?')">Required documents</div>
+    <div class="chip" onclick="askSuggested('What is the attendance requirement?')">Attendance rule</div>
+    <div class="chip" onclick="askSuggested('Which companies visit for recruitment?')">Recruiters</div>
+  </div>
+
+  <div id="chat-window" aria-label="Conversation" role="log" aria-live="polite"></div>
+  <div id="loader" role="status" aria-label="Processing">
+    <div class="dots" role="progressbar" aria-hidden="true">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+    <div class="loader-text">Finding an answer for you...</div>
+  </div>
+
+  <div id="input-area" role="search">
+    <input type="text" id="user-input" placeholder="Type your question here..." autocomplete="off" spellcheck="true" aria-label="Your question">
+    <button id="send-btn" type="button" aria-label="Send question">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l23-12-23-12z"/></svg>
+    </button>
+  </div>
+
+  <div id="controls">
+    <button id="clear-btn" type="button">Clear conversation</button>
+  </div>
+
+  <p id="disclaimer">
+    Sample information only &mdash; illustrative and not official college policy. Replace with official college information before deployment. For anything not covered here, please contact the college department office.
+  </p>
+</main>
+
+<script>
+  // FAQ knowledge base (loaded from the prepared JSON file in a real deployment;
+  // here embedded inline so the chatbot is self-contained).
+  const KB = /*JSON*/[
+  {
+    "id": 1,
+    "category": "Admissions",
+    "question": "What is the eligibility criteria for admission to the B.Tech Computer Science and Engineering program?",
+    "answer": "Candidates must have passed 10+2 (or equivalent) with Physics, Mathematics, and English as compulsory subjects, securing a minimum aggregate of 50% marks. Admission is based on the rank obtained in the state-level engineering entrance examination, followed by counseling conducted by the college.",
+    "keywords": ["admission", "eligibility", "criteria", "B.Tech", "Computer Science", "engineering", "10+2", "Physics", "Mathematics", "English", "50%", "entrance examination", "counseling"]
+  },
+  {
+    "id": 2,
+    "category": "Admissions",
+    "question": "How can I apply for admission?",
+    "answer": "Applications can be submitted online through the college admission portal. Candidates need to register, fill in personal and academic details, upload required documents, and pay the application fee. The application window opens every year in May and closes in June.",
+    "keywords": ["apply", "admission", "application", "online", "portal", "register", "documents", "fee", "May", "June"]
+  },
+  {
+    "id": 3,
+    "category": "Admissions",
+    "question": "What are the admission deadlines?",
+    "answer": "The online application portal opens on May 1, 2026, and closes on June 15, 2026. Counseling sessions are scheduled from June 20 to July 5, 2026. The final date for fee payment and admission confirmation is July 10, 2026.",
+    "keywords": ["deadline", "admission", "May 1", "June 15", "June 20", "July 5", "July 10", "fee payment", "counseling", "confirmation"]
+  },
+  {
+    "id": 4,
+    "category": "Admissions",
+    "question": "What documents are required for admission?",
+    "answer": "Candidates must submit: 10+2 mark sheet and pass certificate, entrance examination rank card, transfer certificate, migration certificate (if applicable), category certificate (if claiming reservation), passport-size photographs, and address proof.",
+    "keywords": ["documents", "required", "admission", "10+2", "mark sheet", "rank card", "transfer certificate", "migration certificate", "category certificate", "photographs", "address proof"]
+  },
+  {
+    "id": 5,
+    "category": "Admissions",
+    "question": "What is the total fee for the B.Tech program?",
+    "answer": "The tuition fee for the B.Tech Computer Science and Engineering program is ₹1,20,000 per year. Additional charges include examination fees, library fees, and hostel fees (optional). The total approximate cost per year including hostel is ₹1,80,000.",
+    "keywords": ["fee", "B.Tech", "tuition", "₹1,20,000", "examination fees", "library fees", "hostel", "₹1,80,000", "cost", "per year"]
+  },
+  {
+    "id": 6,
+    "category": "Admissions",
+    "question": "Are scholarships available?",
+    "answer": "Yes, the college offers merit-based scholarships to students securing top ranks in the entrance examination, covering up to 50% of tuition fees. Need-based financial aid is also available for economically weaker sections, subject to document verification.",
+    "keywords": ["scholarship", "scholarships", "merit", "financial aid", "tuition fees", "50%", "economically weaker", "document verification"]
+  },
+  {
+    "id": 7,
+    "category": "Admissions",
+    "question": "How many seats are available in the department?",
+    "answer": "The Department of Computer Science and Engineering has an annual intake of 120 seats for the B.Tech program, of which 10% are reserved for lateral entry candidates in the second year.",
+    "keywords": ["seats", "seat availability", "intake", "120", "B.Tech", "lateral entry", "second year", "reserved"]
+  },
+  {
+    "id": 8,
+    "category": "Courses",
+    "question": "What courses are offered by the department?",
+    "answer": "The department offers a B.Tech in Computer Science and Engineering (4 years), an M.Tech in Computer Science and Engineering (2 years), and a Diploma in Computer Engineering (3 years).",
+    "keywords": ["courses", "offered", "department", "B.Tech", "Computer Science", "Engineering", "M.Tech", "Diploma", "Computer Engineering", "4 years", "2 years", "3 years"]
+  },
+  {
+    "id": 9,
+    "category": "Courses",
+    "question": "What is the duration of the B.Tech program?",
+    "answer": "The B.Tech Computer Science and Engineering program is a 4-year full-time course divided into 8 semesters.",
+    "keywords": ["duration", "B.Tech", "4-year", "full-time", "8 semesters", "Computer Science", "Engineering"]
+  },
+  {
+    "id": 10,
+    "category": "Courses",
+    "question": "Where can I find the syllabus?",
+    "answer": "The detailed syllabus for each semester is available on the college website under the Academics section and can also be obtained from the department office. The syllabus is designed as per the university curriculum.",
+    "keywords": ["syllabus", "college website", "Academics", "department office", "university curriculum", "semester"]
+  },
+  {
+    "id": 11,
+    "category": "Courses",
+    "question": "What subjects are taught in the first year?",
+    "answer": "First-year subjects include Engineering Mathematics, Engineering Physics, Engineering Chemistry, Basic Electrical and Electronics Engineering, Programming in C, Engineering Graphics, and Communicative English.",
+    "keywords": ["subjects", "first year", "Engineering Mathematics", "Engineering Physics", "Engineering Chemistry", "Programming in C", "Engineering Graphics", "Communicative English"]
+  },
+  {
+    "id": 12,
+    "category": "Courses",
+    "question": "How does the credit system work?",
+    "answer": "Each course is assigned credits based on weekly contact hours. Students must earn a minimum of 160 credits over 8 semesters to graduate, including core courses, elective courses, practical laboratories, and a final-year project.",
+    "keywords": ["credit system", "credits", "weekly contact hours", "160 credits", "8 semesters", "graduate", "core courses", "elective courses", "practical laboratories", "final-year project"]
+  },
+  {
+    "id": 13,
+    "category": "Courses",
+    "question": "Are elective subjects available?",
+    "answer": "Yes, students can choose elective subjects starting from the fifth semester. Electives include Artificial Intelligence, Machine Learning, Data Science, Cloud Computing, Cyber Security, and Mobile Application Development.",
+    "keywords": ["elective", "electives", "subjects", "fifth semester", "Artificial Intelligence", "Machine Learning", "Data Science", "Cloud Computing", "Cyber Security", "Mobile Application Development"]
+  },
+  {
+    "id": 14,
+    "category": "Courses",
+    "question": "What is the attendance requirement?",
+    "answer": "Students must maintain a minimum of 75% attendance in each subject to be eligible to appear for the end-semester examinations. Students with less than 75% attendance may be detained.",
+    "keywords": ["attendance", "requirement", "75%", "subject", "end-semester examinations", "eligible", "detained"]
+  },
+  {
+    "id": 15,
+    "category": "Courses",
+    "question": "Are practical sessions conducted?",
+    "answer": "Yes, practical laboratory sessions are a mandatory part of the curriculum. Laboratories include Programming Lab, Database Lab, Networking Lab, and Project Work. Practical sessions are conducted weekly as per the timetable.",
+    "keywords": ["practical", "sessions", "laboratory", "mandatory", "curriculum", "Programming Lab", "Database Lab", "Networking Lab", "Project Work", "weekly", "timetable"]
+  },
+  {
+    "id": 16,
+    "category": "Examinations",
+    "question": "How can I apply for the semester examination?",
+    "answer": "Students must fill the examination application form online through the student portal before the deadline announced each semester. The hall ticket is issued only after successful submission of the application and clearance of dues.",
+    "keywords": ["apply", "semester examination", "application form", "student portal", "deadline", "hall ticket", "dues", "online"]
+  },
+  {
+    "id": 17,
+    "category": "Examinations",
+    "question": "When are the examination schedules released?",
+    "answer": "The end-semester examination timetable is published on the college website and notice board two weeks before the examinations begin. Internal assessment schedules are announced by individual faculty members.",
+    "keywords": ["examination schedule", "released", "timetable", "college website", "notice board", "two weeks", "examinations", "internal assessment"]
+  },
+  {
+    "id": 18,
+    "category": "Examinations",
+    "question": "How do I get my hall ticket?",
+    "answer": "Hall tickets can be downloaded from the student portal after submitting the examination application. Students must carry a printed hall ticket and a valid college ID to the examination hall.",
+    "keywords": ["hall ticket", "download", "student portal", "examination application", "college ID", "examination hall"]
+  },
+  {
+    "id": 19,
+    "category": "Examinations",
+    "question": "What are the passing criteria?",
+    "answer": "A student must secure a minimum of 40% marks in each subject (theory and practical separately) and an aggregate of 50% to pass a semester. Internal assessment carries 30% weightage and end-semester examination carries 70%.",
+    "keywords": ["passing criteria", "40%", "marks", "subject", "theory", "practical", "aggregate", "50%", "pass", "semester", "internal assessment", "end-semester examination", "70%", "30%"]
+  },
+  {
+    "id": 20,
+    "category": "Examinations",
+    "question": "Can I apply for revaluation?",
+    "answer": "Yes, students may apply for revaluation of their answer scripts within 10 days of the result declaration by submitting a revaluation application and paying the prescribed fee per subject.",
+    "keywords": ["revaluation", "apply", "answer scripts", "10 days", "result declaration", "fee", "subject"]
+  },
+  {
+    "id": 21,
+    "category": "Examinations",
+    "question": "Are supplementary examinations conducted?",
+    "answer": "Yes, supplementary examinations are conducted for students who fail in one or more subjects. Applications for supplementary exams must be submitted within 15 days of result declaration.",
+    "keywords": ["supplementary", "examinations", "conducted", "fail", "subjects", "15 days", "result declaration", "application"]
+  },
+  {
+    "id": 22,
+    "category": "Examinations",
+    "question": "When are results declared?",
+    "answer": "Semester examination results are declared within 45 days of the last examination and are published on the college student portal. Students receive SMS and email notifications when results are available.",
+    "keywords": ["results", "declared", "45 days", "last examination", "student portal", "SMS", "email", "notifications"]
+  },
+  {
+    "id": 23,
+    "category": "Placements",
+    "question": "Who is eligible for campus placements?",
+    "answer": "Students in the final year of B.Tech or M.Tech with no active backlogs, a minimum cumulative GPA of 6.0, and at least 75% attendance are eligible to register for campus placement drives.",
+    "keywords": ["eligible", "campus placements", "final year", "B.Tech", "M.Tech", "backlogs", "GPA", "6.0", "attendance", "placement drives"]
+  },
+  {
+    "id": 24,
+    "category": "Placements",
+    "question": "How does campus recruitment work?",
+    "answer": "The placement cell invites companies to campus for recruitment. The process includes pre-placement talks, written tests, group discussions, and interviews. Placement drives are held from August to March each year.",
+    "keywords": ["campus recruitment", "work", "placement cell", "companies", "pre-placement talks", "written tests", "group discussions", "interviews", "August", "March"]
+  },
+  {
+    "id": 25,
+    "category": "Placements",
+    "question": "Are internship opportunities available?",
+    "answer": "Yes, the department facilitates summer internships after the sixth semester and final-year industry projects. The placement cell assists students in securing internships with partner companies.",
+    "keywords": ["internship", "opportunities", "available", "summer internships", "sixth semester", "final-year", "industry projects", "placement cell", "partner companies"]
+  },
+  {
+    "id": 26,
+    "category": "Placements",
+    "question": "Does the college provide placement training?",
+    "answer": "Yes, the college conducts placement training from the third year, including aptitude training, soft skills development, technical mock interviews, resume-building workshops, and coding practice sessions.",
+    "keywords": ["placement training", "college", "third year", "aptitude training", "soft skills", "technical mock interviews", "resume-building", "coding practice", "sessions"]
+  },
+  {
+    "id": 27,
+    "category": "Placements",
+    "question": "Which companies visit for recruitment?",
+    "answer": "Recruiters include IT and software companies such as Infosys, TCS, Wipro, Cognizant, Accenture, and HCL, along with startups and core engineering firms. The list of recruiters varies each year.",
+    "keywords": ["companies", "recruiters", "visit", "recruitment", "Infosys", "TCS", "Wipro", "Cognizant", "Accenture", "HCL", "startups", "core engineering firms"]
+  },
+  {
+    "id": 28,
+    "category": "Placements",
+    "question": "How can I prepare my resume?",
+    "answer": "The placement cell offers resume-building workshops and reviews student resumes before placement drives. Students are advised to highlight academic projects, technical skills, internships, and certifications.",
+    "keywords": ["prepare", "resume", "placement cell", "workshops", "reviews", "placement drives", "academic projects", "technical skills", "internships", "certifications"]
+  },
+  {
+    "id": 29,
+    "category": "Placements",
+    "question": "What is the interview procedure?",
+    "answer": "The interview procedure typically includes an online aptitude test, followed by a technical interview and an HR interview. Shortlisted candidates proceed through each round based on performance.",
+    "keywords": ["interview", "procedure", "online aptitude test", "technical interview", "HR interview", "shortlisted", "performance", "rounds"]
+  }
+];
+
+  const FALLBACK = "I'm sorry, I couldn't find an answer to your question in the available college FAQ knowledge base. Please contact the college department office for further assistance.";
+
+  // Optional generative AI integration point. Replace `GENERATIVE_AI_ENDPOINT`
+  // with a real model API (e.g., OpenAI-compatible endpoint) and supply an API key
+  // to have answers generated by a generative AI model grounded in the retrieved context.
+  const GENERATIVE_AI_ENDPOINT = ""; // set to your generative AI API endpoint to enable AI generation
+  const GENERATIVE_AI_API_KEY = "";  // set your API key here
+
+  /* ---------- Text processing ---------- */
+  function normalize(text) {
+    return String(text).toLowerCase().replace(/[^a-z0-9%₹.,\s]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function tokens(text) { return normalize(text).split(" ").filter(Boolean); }
+  const STOP = new Set(["the","is","are","a","an","of","in","to","for","and","or","can","i","my","me","you","your","be","been","being","have","has","had","do","does","did","will","would","could","should","may","might","must","shall","what","which","who","where","when","how","why","whom","this","that","these","those","it","its","as","at","by","from","on","with","about","into","through","during","before","after","above","below","between","under","again","further","then","once","here","there","all","each","few","more","most","other","some","such","no","nor","not","only","own","same","so","than","too","very","just","don","now"]);
+  function contentTokens(text) { return tokens(text).filter(t => !STOP.has(t) && t.length > 1); }
+
+  function levenshtein(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    const row = [];
+    for (let j = 0; j <= b.length; j++) row[j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      let prev = i;
+      for (let j = 1; j <= b.length; j++) {
+        const cur = Math.min(row[j] + 1, prev + 1, row[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        row[j - 1] = prev;
+        prev = cur;
+      }
+      row[b.length] = prev;
+    }
+    return row[b.length];
+  }
+
+  const index = KB.map(entry => ({
+    entry,
+    tokenSet: new Set(contentTokens([entry.question, entry.answer, ...entry.keywords, entry.category].join(" "))),
+    keywordSet: new Set(entry.keywords.map(k => normalize(k))),
+    categorySet: new Set(contentTokens(entry.category))
+  }));
+
+  function scoreEntry(idx, qTokens) {
+    let exact = 0, fuzzy = 0;
+    for (const t of qTokens) {
+      if (idx.tokenSet.has(t)) { exact++; continue; }
+      for (const kw of idx.keywordSet) {
+        if (levenshtein(t, kw) <= 2 && Math.max(t.length, kw.length) >= 4) { fuzzy += 0.5; break; }
+      }
+    }
+    let score = (exact + fuzzy) / Math.max(qTokens.length, 1);
+    for (const t of qTokens) if (idx.categorySet.has(t)) score += 0.05;
+    return Math.min(score, 1);
+  }
+
+  function retrieve(query, threshold = 0.30, topN = 3) {
+    const qTokens = contentTokens(query);
+    return index.map(idx => ({ entry: idx.entry, score: scoreEntry(idx, qTokens) }))
+      .filter(x => x.score >= threshold)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topN);
+  }
+
+  /* ---------- Generative AI answer generation (grounded) ---------- */
+  async function generateWithAI(context, question) {
+    if (!GENERATIVE_AI_ENDPOINT) return null;
+    try {
+      const system = "You are a helpful college FAQ assistant. Answer ONLY using the provided FAQ context. Do not invent facts. If the context does not contain the answer, reply exactly with the fallback phrase. Keep the answer concise and natural.";
+      const body = JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: `FAQ Context:\n${context}\n\nQuestion: ${question}\n\nAnswer using only the context above.` }
+        ],
+        temperature: 0.2,
+        max_tokens: 300
+      });
+      const res = await fetch(GENERATIVE_AI_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${GENERATIVE_AI_API_KEY}` },
+        body
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || data.text || "";
+      return text.trim() || null;
+    } catch (e) {
+      console.warn("Generative AI unavailable, using retrieval answer.", e);
+      return null;
+    }
+  }
+
+  async function generateAnswer(query, matches) {
+    if (!matches || matches.length === 0) return FALLBACK;
+    const best = matches[0];
+
+    // Attempt generative AI generation grounded in retrieved context
+    if (GENERATIVE_AI_ENDPOINT) {
+      const context = matches.map(m => `Q: ${m.entry.question}\nA: ${m.entry.answer}`).join("\n\n");
+      const aiAnswer = await generateWithAI(context, query);
+      if (aiAnswer && aiAnswer !== FALLBACK) return aiAnswer;
+      // if AI returned fallback or empty, fall through to retrieval answer
+    }
+
+    // Retrieval-based grounded answer (no invention). Strong single match -> use it directly.
+    if (best.score >= 0.45) return best.entry.answer;
+    // Multiple moderate matches -> combine concisely.
+    if (matches.length >= 2 && matches[1].score >= 0.30) return matches.map(m => m.entry.answer).join(" ");
+    // Weak match -> unsupported.
+    return FALLBACK;
+  }
+
+  async function answerQuestion(query) {
+    return generateAnswer(query, retrieve(query));
+  }
+
+  /* ---------- UI ---------- */
+  const chatWindow = document.getElementById("chat-window");
+  const input = document.getElementById("user-input");
+  const sendBtn = document.getElementById("send-btn");
+  const loader = document.getElementById("loader");
+  const clearBtn = document.getElementById("clear-btn");
+
+  let botTurn = 0;
+
+  function addBotMessage(html, welcome = false) {
+    const div = document.createElement("div");
+    div.className = "msg bot";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = html;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    div.appendChild(bubble);
+    div.appendChild(meta);
+    chatWindow.appendChild(div);
+    scrollBottom();
+    return div;
+  }
+
+  function addUserMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg user";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    div.appendChild(bubble);
+    div.appendChild(meta);
+    chatWindow.appendChild(div);
+    scrollBottom();
+  }
+
+  function scrollBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
+
+  function showLoader(show) {
+    loader.classList.toggle("show", show);
+    if (show) scrollBottom();
+  }
+
+  function setInputEnabled(en) {
+    input.disabled = !en;
+    sendBtn.disabled = !en;
+    if (en) input.focus();
+  }
+
+  async function handleSubmit() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    addUserMessage(text);
+    setInputEnabled(false);
+    showLoader(true);
+
+    try {
+      const reply = await answerQuestion(text);
+      addBotMessage(escapeHtml(reply).replace(/\n/g, "<br>"));
+    } catch (err) {
+      console.error(err);
+      addBotMessage(escapeHtml(FALLBACK));
+    } finally {
+      showLoader(false);
+      setInputEnabled(true);
+    }
+  }
+
+  sendBtn.addEventListener("click", handleSubmit);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") handleSubmit(); });
+
+  window.askSuggested = function(q) {
+    input.value = q;
+    handleSubmit();
+  };
+
+  clearBtn.addEventListener("click", () => {
+    chatWindow.innerHTML = "";
+    botTurn = 0;
+    addBotMessage("Conversation cleared. How can I help you today?");
+  });
+
+  // Initialize with welcome bot message
+  addBotMessage("Hello! I'm the FAQ assistant for the Department of Computer Science and Engineering. I can help with admissions, courses, examinations, and placements. What would you like to know?", true);
+
+  /* ---------- Helpers ---------- */
+  function escapeHtml(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered FAQ chatbot for the Department of Computer Science & Engineering, Riverdale Institute of Technology." />
+  <title>Dept. FAQ Assistant — Computer Science &amp; Engineering | Riverdale Institute of Technology</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b3d6e'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='%23f4b942' font-family='Arial' font-weight='bold'>R</text></svg>" />
+</head>
+<body>
+  <div class="page">
+    <!-- ============================ HEADER ============================ -->
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">CS</div>
+        <div class="brand-text">
+          <h1>Department FAQ Assistant</h1>
+          <p>Computer Science &amp; Engineering &middot; Riverdale Institute of Technology</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="restartBtn" class="btn btn-ghost" type="button" title="Clear the conversation and start over">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8Z"/></svg>
+          <span>Clear chat</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============================= MAIN ============================= -->
+    <main class="layout">
+      <!-- Chat panel -->
+      <section class="chat-card" aria-label="Chat window">
+        <div id="chatWindow" class="chat-window" role="log" aria-live="polite" aria-relevant="additions">
+          <!-- Welcome message and messages are rendered by src/app.js -->
+        </div>
+
+        <div id="typingIndicator" class="typing-row hidden" aria-hidden="true">
+          <div class="avatar avatar-bot">CS</div>
+          <div class="bubble bubble-bot typing">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="sr-only">The chatbot is typing</span>
+          </div>
+        </div>
+
+        <!-- Suggested questions -->
+        <div class="suggest-block">
+          <p class="suggest-title">Suggested questions</p>
+          <div id="suggestions" class="suggest-chips">
+            <button class="chip" type="button" data-q="What are the eligibility criteria for admission?">Admission eligibility</button>
+            <button class="chip" type="button" data-q="Which courses are offered by the department?">Courses offered</button>
+            <button class="chip" type="button" data-q="When are the examinations conducted?">Exam schedule</button>
+            <button class="chip" type="button" data-q="How can I apply for the semester examination?">Apply for exam</button>
+            <button class="chip" type="button" data-q="Does the college provide placement training?">Placement training</button>
+            <button class="chip" type="button" data-q="What are the fees for the programme?">Fees</button>
+            <button class="chip" type="button" data-q="What is the attendance requirement?">Attendance rules</button>
+            <button class="chip" type="button" data-q="Which companies visit the campus for recruitment?">Recruiters</button>
+          </div>
+        </div>
+
+        <!-- Composer -->
+        <form id="chatForm" class="composer" autocomplete="off">
+          <label class="sr-only" for="userInput">Type your question</label>
+          <input
+            id="userInput"
+            name="question"
+            type="text"
+            placeholder="Ask about admissions, courses, exams or placements…"
+            maxlength="300"
+            required
+          />
+          <button id="sendBtn" class="btn btn-primary" type="submit">
+            <span>Send</span>
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </form>
+        <p class="composer-hint">Press <kbd>Enter</kbd> to send &middot; Answers come only from the official FAQ knowledge base.</p>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="side-card">
+        <div class="side-block">
+          <h2>About this chatbot</h2>
+          <p>
+            Ask questions about <strong>Admissions</strong>, <strong>Courses</strong>,
+            <strong>Examinations</strong> and <strong>Placements</strong>. The assistant answers only
+            from the department FAQ knowledge base and will not guess when it does not know.
+          </p>
+        </div>
+
+        <div class="side-block">
+          <h2>Knowledge base</h2>
+          <ul class="kb-stats">
+            <li><span id="statCount">–</span> FAQ entries</li>
+            <li><span id="statCategories">–</span> categories</li>
+            <li><span id="statThreshold">–</span> answer-confidence threshold</li>
+          </ul>
+          <div class="source-pills">
+            <span class="pill pill-adm">Admissions</span>
+            <span class="pill pill-crse">Courses</span>
+            <span class="pill pill-exam">Examinations</span>
+            <span class="pill pill-plc">Placements</span>
+          </div>
+        </div>
+
+        <div class="side-block">
+          <h2>Tips</h2>
+          <ul class="tips">
+            <li>Ask short, specific questions for the best match.</li>
+            <li>Small spelling mistakes are tolerated automatically.</li>
+            <li>If the answer is not in the FAQ, the bot will say so and refer you to the department office.</li>
+          </ul>
+        </div>
+
+        <div class="side-block side-alert">
+          <h2>Please note</h2>
+          <p>
+            All content in this demo knowledge base is <strong>illustrative sample data</strong>
+            prepared for a project. Replace it with official college information before deployment.
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        &copy; 2026 Department of Computer Science &amp; Engineering, Riverdale Institute of Technology.
+        Sample FAQ chatbot — content is illustrative and must be replaced with official college
+        information before deployment.
+      </p>
+    </footer>
+  </div>
+
+  <!-- FAQ knowledge base (generated from docs/FAQ_Document.md by tools/build-kb.js) -->
+  <script src="data/faq-knowledge-base.js"></script>
+  <!-- Answer engine -->
+  <script src="src/answer-engine.js"></script>
+  <!-- Chatbot interface -->
+  <script src="src/app.js"></script>
+</body>
+</html>
